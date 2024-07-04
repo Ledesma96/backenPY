@@ -1,0 +1,11 @@
+:root{
+    font-family: sans-serif;
+}
+
+
+.close{
+    display: none;
+}
+.open{
+    display: flex;
+}
