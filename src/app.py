@@ -29,6 +29,38 @@ def home():
 
     return render_template('/index.html', data = result);
 
+@socketio.on('update')
+def update_film(data):
+    film_id = data['id']
+
+    try:
+        if 'price' in data and 'ratings' in data:
+            price = Decimal(data['price'])
+            ratings = Decimal(data['ratings'])
+
+            cursor.execute('UPDATE peliculas SET price=%s, ratings=%s WHERE id=%s', (price, ratings, film_id))
+            db.database.commit()
+        
+        elif 'price' in data:
+            price = Decimal(data['price'])
+            cursor.execute('UPDATE peliculas SET price=%s WHERE id=%s', (price, film_id))
+            db.database.commit()
+        
+        elif 'ratings' in data:
+            ratings = Decimal(data['ratings'])
+            cursor.execute('UPDATE peliculas SET ratings=%s WHERE id=%s', (ratings, film_id))
+            db.database.commit()
+
+        
+        cursor.execute('SELECT * FROM peliculas')
+        films = cursor.fetchall() 
+        
+        emit('all-films', json.dumps({'data': films}, cls=DecimalEncoder), broadcast=True)
+    
+    except Exception as e:
+        print(f"Error en update: {str(e)}")
+
+
 # @app.route('/add-film', methods=['POST'])
 # def add_film():
 #     film_data = request.json
